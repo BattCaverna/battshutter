@@ -1,19 +1,43 @@
 #include "motor.h"
 
-#define MOTOR_PWR 12
-#define MOTOR_DIR 11
+#define MOTOR_PWR 9 // D9
+//#define MOTOR_DIR LED_BUILTIN
+#define MOTOR_DIR 8 // D8
 
-#define GUARD_TIME 50 //ms
+#define GUARD_TIME 1000 //ms
 
-static MotorStatus curr_status;
-static MotorStatus new_status;
+typedef enum
+{
+  MFSM_STOP = 0,
+  MFSM_WAIT_MOVE,
+  MFSM_MOVE,
+  MFSM_WAIT_STOP,
+  MFSM_CNT,
+} MotorFSM;
+
+typedef MotorFSM (*motor_fsm_t)(MotorDir);
+
 static long prev_move;
+static MotorDir last_button;
+
+static MotorFSM fsm_stop(MotorDir val);
+static MotorFSM fsm_wait_move(MotorDir val);
+static MotorFSM fsm_move(MotorDir val);
+static MotorFSM fsm_wait_stop(MotorDir val);
+
+static const motor_fsm_t fsm_states[MFSM_CNT] =
+{
+  fsm_stop,
+  fsm_wait_move,
+  fsm_move,
+  fsm_wait_stop,
+}; 
+static MotorFSM curr_state;
 
 #define MOTOR_ON   HIGH
 #define MOTOR_OFF  LOW
 #define MOTOR_UP   LOW
 #define MOTOR_DOWN HIGH
-
 
 void motor_init()
 {
@@ -21,22 +45,13 @@ void motor_init()
   digitalWrite(MOTOR_PWR, MOTOR_OFF);
   pinMode(MOTOR_DIR, OUTPUT);
   digitalWrite(MOTOR_DIR, MOTOR_UP);
-  prev_move = millis();
-  curr_status = MS_STOP;
-  new_status = MS_STOP;
+  curr_state = MFSM_STOP;
+  last_button = MS_STOP;
 }
 
-void motor_enable(MotorStatus val);
+static void motor_setDir(MotorDir dir);
 
-void motor_enable(MotorStatus val)
-{
-  new_status = val;
-  motor_poll();
-}
-
-static void motor_setDir(MotorStatus dir);
-
-static void motor_setDir(MotorStatus dir)
+static void motor_setDir(MotorDir dir)
 {
     if (dir == MS_DOWN)
       digitalWrite(MOTOR_DIR, MOTOR_DOWN);
@@ -44,35 +59,79 @@ static void motor_setDir(MotorStatus dir)
       digitalWrite(MOTOR_DIR, MOTOR_UP);  
 }
 
-void motor_poll()
-{  
-  long now = millis();
-  
-  if (new_status == curr_status)
-  {
-    prev_move = now;
-    return;
-  }
-
-  if (new_status == MS_STOP)
-    digitalWrite(MOTOR_PWR, MOTOR_OFF);
-  else
-    motor_setDir(new_status);
-
-  if (now - prev_move >= GUARD_TIME)
-  {
-    if (new_status == MS_STOP)
-      motor_setDir(new_status);
-    else
-      digitalWrite(MOTOR_PWR, MOTOR_ON);
-      
-    curr_status = new_status;
-  }
+void motor_poll(MotorDir val)
+{
+  MotorFSM new_state = fsm_states[curr_state](val);
+  if (new_state != curr_state)
+    Serial.println(curr_state);
+  curr_state = new_state;
 }
 
-MotorStatus motor_status();
-
-MotorStatus motor_status()
+static MotorFSM fsm_stop(MotorDir val)
 {
-  return curr_status;
+  last_button = val;
+  if (val == MS_STOP)
+  {
+    digitalWrite(MOTOR_PWR, MOTOR_OFF);
+    return MFSM_STOP;
+  }
+    
+  motor_setDir(val);
+  prev_move = millis();
+    
+  return MFSM_WAIT_MOVE;  
+}
+
+static MotorFSM fsm_wait_move(MotorDir val)
+{
+  if (val == MS_STOP)
+  {
+    motor_setDir(MS_STOP);
+    return MFSM_STOP;
+  }
+
+  if (val != last_button)
+  {
+    motor_setDir(val);
+    prev_move = millis();
+    last_button = val;
+  }
+
+  if (millis() - prev_move >= GUARD_TIME)
+  {
+    digitalWrite(MOTOR_PWR, MOTOR_ON);
+    return MFSM_MOVE;
+  }
+
+  return MFSM_WAIT_MOVE;
+}
+
+static MotorFSM fsm_move(MotorDir val)
+{
+  if (val != last_button)
+  {
+    digitalWrite(MOTOR_PWR, MOTOR_OFF);
+    prev_move = millis();
+    return MFSM_WAIT_STOP;
+  }
+
+  return MFSM_MOVE;
+}
+
+static MotorFSM fsm_wait_stop(MotorDir val)
+{
+  if (millis() - prev_move >= GUARD_TIME)
+  {
+    motor_setDir(MS_STOP);
+    return MFSM_STOP;
+  }
+
+  return MFSM_WAIT_STOP;
+}
+
+MotorDir motor_direction();
+
+MotorDir motor_direction()
+{
+  return last_button;
 }

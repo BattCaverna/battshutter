@@ -1,14 +1,15 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-typedef enum MotorStatus
+typedef enum MotorDir
 {
   MS_STOP,
   MS_UP,
   MS_DOWN,
   MS_CNT
-} MotorStatus;
+} MotorDir;
 
-MotorStatus motor_status();
+MotorDir motor_direction();
+void motor_poll(MotorDir val);
 
 #endif

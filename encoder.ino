@@ -1,6 +1,6 @@
 #include "motor.h"
 
-#define ENC_PIN 4
+#define ENC_PIN 2 //D2
 
 static int encoder_curr_pos = 0;
 static bool prev_encoder;
@@ -17,9 +17,9 @@ int encoder_poll()
   if (state && !prev_encoder)
   {
     //Positive edge
-    if (motor_status() == MS_DOWN)
+    if (motor_direction() == MS_DOWN)
       encoder_curr_pos--;
-    else if (motor_status() == MS_UP)
+    else if (motor_direction() == MS_UP)
       encoder_curr_pos++;
   }
 
