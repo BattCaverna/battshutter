@@ -6,7 +6,7 @@ static bool prev_encoder;
 
 void encoder_init()
 {
-  pinMode(ENC_PIN, INPUT);
+  pinMode(ENC_PIN, INPUT_PULLUP);
   prev_encoder = digitalRead(ENC_PIN);
 }
 
