@@ -9,7 +9,7 @@
 void setup() {
   Serial.begin(MODBUS_BAUDRATE);
   uint8_t addr = addr_init();
-  
+
 #if !MODBUS_ON
   Serial.print("BattShutter start, address:");
   Serial.println(addr);
@@ -31,32 +31,40 @@ void setup() {
   ModbusRTUServer.configureCoils(LED_COIL_REG, 1);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // configure encoder register
-  ModbusRTUServer.configureHoldingRegisters(ENC_HOLD_REG, 1);
-  ModbusRTUServer.configureHoldingRegisters(TARGET_HOLD_REG, 1);
+  // configure registers
+  ModbusRTUServer.configureHoldingRegisters(START_REG, HOLD_REG_CNT);
 #endif
 }
 
 void loop() {
-  encoder_poll();
+  int target = encoder_poll();
+  bool upd_target = false;
+  
   switch (switches_poll())
   {
     case S_UP:
-      motor_poll(MS_UP);
+      target += (ENC_HYST + 1);
+      upd_target = true;
       break;
     case S_DOWN:
-      motor_poll(MS_DOWN);
+      target -= (ENC_HYST + 1);
+      upd_target = true;
       break;
     default:
-      motor_poll(MS_STOP);
+      break;
   }
-  
+
+  if (upd_target)
+    ModbusRTUServer.holdingRegisterWrite(TARGET_HOLD_REG, target);
+
 #if MODBUS_ON
   // poll for Modbus RTU requests
   ModbusRTUServer.poll();
 
   ModbusRTUServer.holdingRegisterWrite(ENC_HOLD_REG, encoder_position());
 
+  target = ModbusRTUServer.holdingRegisterRead(TARGET_HOLD_REG);
+  
 
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);
@@ -69,4 +77,13 @@ void loop() {
     digitalWrite(LED_BUILTIN, LOW);
   }
 #endif
+
+  int delta = target - encoder_position();
+  
+  if (delta > ENC_HYST)
+    motor_poll(MS_UP);
+  else if (delta < -ENC_HYST)
+    motor_poll(MS_DOWN);
+  else
+    motor_poll(MS_STOP);
 }

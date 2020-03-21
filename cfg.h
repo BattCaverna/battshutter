@@ -8,11 +8,21 @@
 #define ADDR0 3 // D3
 #define ADDR1 4 // D3
 #define ADDR2 5 // D3
-#define BASE_ADDR 0x10 // Start address when pin address=0
+#define BASE_ADDR 0x10 // Mobbus start address when pin address=0
 
 #define LED_COIL_REG 0x00
-#define ENC_HOLD_REG 0x00
-#define TARGET_HOLD_REG 0x00
+
+// Modbus holding registers
+#define START_REG 0x00
+
+enum HoldingRegs
+{
+  ENC_HOLD_REG = START_REG, // Encoder
+  TARGET_HOLD_REG, // Target position
+  HOLD_REG_END
+};
+
+#define HOLD_REG_CNT (HOLD_REG_END - START_REG)
 
 // Switches
 #define UP_SWITCH   A2
@@ -24,6 +34,7 @@
 
 // Encoder
 #define ENC_PIN 2 //D2
+#define ENC_HYST 0
 
 //Motor
 #define MOTOR_PWR 9 // D9
