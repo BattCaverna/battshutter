@@ -5,11 +5,11 @@
 #include "cfg.h"
 
 void setup() {
-  RS485.setPins(RS485_DEFAULT_TX_PIN, DE_RS485, RE_RS485);
-  
+  Serial.begin(MODBUS_BAUDRATE);
+  uint8_t addr = addr_init();
 #if !MODBUS_ON
-  Serial.begin(9600);
-  Serial.println("BattShutter start");
+  Serial.print("BattShutter start, address:");
+  Serial.println(addr);
 #endif
 
   encoder_init();
@@ -18,8 +18,9 @@ void setup() {
   pinMode(DOWN_SWITCH, INPUT_PULLUP);
 
 #if MODBUS_ON
+  RS485.setPins(RS485_DEFAULT_TX_PIN, DE_RS485, RE_RS485);
   // start the Modbus RTU server, with (slave) id 1
-  if (!ModbusRTUServer.begin(1, 9600)) {
+  if (!ModbusRTUServer.begin(addr, MODBUS_BAUDRATE)) {
     Serial.println("Failed to start Modbus RTU Server!");
     while (1);
   }
