@@ -1,12 +1,15 @@
 #include <ArduinoRS485.h> // ArduinoModbus depends on the ArduinoRS485 library
 #include <ArduinoModbus.h>
+
 #include "motor.h"
+#include "switches.h"
 
 #include "cfg.h"
 
 void setup() {
   Serial.begin(MODBUS_BAUDRATE);
   uint8_t addr = addr_init();
+  
 #if !MODBUS_ON
   Serial.print("BattShutter start, address:");
   Serial.println(addr);
@@ -14,8 +17,7 @@ void setup() {
 
   encoder_init();
   motor_init();
-  pinMode(UP_SWITCH, INPUT_PULLUP);
-  pinMode(DOWN_SWITCH, INPUT_PULLUP);
+  switches_init();
 
 #if MODBUS_ON
   RS485.setPins(RS485_DEFAULT_TX_PIN, DE_RS485, RE_RS485);
@@ -33,13 +35,18 @@ void setup() {
 
 void loop() {
   encoder_poll();
-  if (digitalRead(UP_SWITCH) == 0)
-    motor_poll(MS_UP);
-  else if (digitalRead(DOWN_SWITCH) == 0)
-    motor_poll(MS_DOWN);
-  else
-    motor_poll(MS_STOP);
-    
+  switch (switches_poll())
+  {
+    case S_UP:
+      motor_poll(MS_UP);
+      break;
+    case S_DOWN:
+      motor_poll(MS_DOWN);
+      break;
+    default:
+      motor_poll(MS_STOP);
+  }
+  
 #if MODBUS_ON
   // poll for Modbus RTU requests
   ModbusRTUServer.poll();
