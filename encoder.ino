@@ -21,6 +21,9 @@ int encoder_poll()
     else if (motor_direction() == MS_UP)
       encoder_curr_pos++;
   }
+  
+  if (encoder_curr_pos < 0)
+    encoder_curr_pos = 0;
 
   prev_encoder = state;
   return encoder_curr_pos;
