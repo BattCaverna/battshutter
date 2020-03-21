@@ -10,6 +10,10 @@
 #define ADDR2 5 // D3
 #define BASE_ADDR 0x10 // Start address when pin address=0
 
+#define LED_COIL_REG 0x00
+#define ENC_HOLD_REG 0x00
+#define TARGET_HOLD_REG 0x00
+
 // Switches
 #define UP_SWITCH   A2
 #define DOWN_SWITCH A1

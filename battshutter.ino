@@ -21,15 +21,19 @@ void setup() {
 
 #if MODBUS_ON
   RS485.setPins(RS485_DEFAULT_TX_PIN, DE_RS485, RE_RS485);
-  // start the Modbus RTU server, with (slave) id 1
+  // start the Modbus RTU server, with (slave) address
   if (!ModbusRTUServer.begin(addr, MODBUS_BAUDRATE)) {
     Serial.println("Failed to start Modbus RTU Server!");
     while (1);
   }
 
-  // configure a single coil at address 0x00
-  ModbusRTUServer.configureCoils(0x00, 1);
+  // configure builtin led
+  ModbusRTUServer.configureCoils(LED_COIL_REG, 1);
   pinMode(LED_BUILTIN, OUTPUT);
+
+  // configure encoder register
+  ModbusRTUServer.configureHoldingRegisters(ENC_HOLD_REG, 1);
+  ModbusRTUServer.configureHoldingRegisters(TARGET_HOLD_REG, 1);
 #endif
 }
 
@@ -51,9 +55,11 @@ void loop() {
   // poll for Modbus RTU requests
   ModbusRTUServer.poll();
 
+  ModbusRTUServer.holdingRegisterWrite(ENC_HOLD_REG, encoder_position());
+
 
   // read the current value of the coil
-  int coilValue = ModbusRTUServer.coilRead(0x00);
+  int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);
 
   if (coilValue) {
     // coil value set, turn LED on
