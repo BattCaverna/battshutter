@@ -1,6 +1,5 @@
 #include "motor.h"
-
-#define ENC_PIN 2 //D2
+#include "cfg.h"
 
 static int encoder_curr_pos = 0;
 static bool prev_encoder;

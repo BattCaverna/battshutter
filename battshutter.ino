@@ -2,15 +2,7 @@
 #include <ArduinoModbus.h>
 #include "motor.h"
 
-const int ledPin = LED_BUILTIN;
-
-#define UP_SWITCH   A2
-#define DOWN_SWITCH A1
-
-#define DE_RS485 A0
-#define RE_RS485 A3
-
-#define MODBUS_ON 1
+#include "cfg.h"
 
 void setup() {
   RS485.setPins(RS485_DEFAULT_TX_PIN, DE_RS485, RE_RS485);
@@ -34,7 +26,7 @@ void setup() {
 
   // configure a single coil at address 0x00
   ModbusRTUServer.configureCoils(0x00, 1);
-  pinMode(ledPin, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 #endif
 }
 
@@ -57,10 +49,10 @@ void loop() {
 
   if (coilValue) {
     // coil value set, turn LED on
-    digitalWrite(ledPin, HIGH);
+    digitalWrite(LED_BUILTIN, HIGH);
   } else {
     // coild value clear, turn LED off
-    digitalWrite(ledPin, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
   }
 #endif
 }

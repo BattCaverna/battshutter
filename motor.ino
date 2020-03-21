@@ -1,10 +1,5 @@
 #include "motor.h"
-
-#define MOTOR_PWR 9 // D9
-//#define MOTOR_DIR LED_BUILTIN
-#define MOTOR_DIR 8 // D8
-
-#define GUARD_TIME 1000 //ms
+#include "cfg.h"
 
 typedef enum
 {
@@ -31,7 +26,7 @@ static const motor_fsm_t fsm_states[MFSM_CNT] =
   fsm_wait_move,
   fsm_move,
   fsm_wait_stop,
-}; 
+};
 static MotorFSM curr_state;
 
 #define MOTOR_ON   HIGH
@@ -53,17 +48,19 @@ static void motor_setDir(MotorDir dir);
 
 static void motor_setDir(MotorDir dir)
 {
-    if (dir == MS_DOWN)
-      digitalWrite(MOTOR_DIR, MOTOR_DOWN);
-    else
-      digitalWrite(MOTOR_DIR, MOTOR_UP);  
+  if (dir == MS_DOWN)
+    digitalWrite(MOTOR_DIR, MOTOR_DOWN);
+  else
+    digitalWrite(MOTOR_DIR, MOTOR_UP);
 }
 
 void motor_poll(MotorDir val)
 {
   MotorFSM new_state = fsm_states[curr_state](val);
+#if !MODBUS_ON
   if (new_state != curr_state)
     Serial.println(curr_state);
+#endif
   curr_state = new_state;
 }
 
@@ -75,11 +72,11 @@ static MotorFSM fsm_stop(MotorDir val)
     digitalWrite(MOTOR_PWR, MOTOR_OFF);
     return MFSM_STOP;
   }
-    
+
   motor_setDir(val);
   prev_move = millis();
-    
-  return MFSM_WAIT_MOVE;  
+
+  return MFSM_WAIT_MOVE;
 }
 
 static MotorFSM fsm_wait_move(MotorDir val)
@@ -128,8 +125,6 @@ static MotorFSM fsm_wait_stop(MotorDir val)
 
   return MFSM_WAIT_STOP;
 }
-
-MotorDir motor_direction();
 
 MotorDir motor_direction()
 {
