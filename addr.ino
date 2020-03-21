@@ -17,5 +17,5 @@ uint8_t addr_init()
   // Only 3 bits address
   addr &= 0x07;
   
-  return addr;
+  return BASE_ADDR + addr;
 }

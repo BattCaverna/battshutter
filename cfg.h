@@ -4,6 +4,12 @@
 #define MODBUS_ON 1
 #define MODBUS_BAUDRATE 9600
 
+//Modbus address
+#define ADDR0 3 // D3
+#define ADDR1 4 // D3
+#define ADDR2 5 // D3
+#define BASE_ADDR 0x10 // Start address when pin address=0
+
 // Switches
 #define UP_SWITCH   A2
 #define DOWN_SWITCH A1
@@ -20,9 +26,5 @@
 #define MOTOR_DIR 8 // D8
 #define GUARD_TIME 500 //ms
 
-//Modbus address
-#define ADDR0 3 // D3
-#define ADDR1 4 // D3
-#define ADDR2 5 // D3
 
 #endif
