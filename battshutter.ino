@@ -7,6 +7,8 @@
 #include "cfg.h"
 
 
+unsigned target_pos;
+
 void setup() {
   Serial.begin(MODBUS_BAUDRATE);
   uint8_t addr = addr_init();
@@ -17,6 +19,7 @@ void setup() {
 #endif
 
   encoder_init();
+  target_pos = encoder_position();
   motor_init();
   switches_init();
 
@@ -34,11 +37,11 @@ void setup() {
 
   // configure registers
   ModbusRTUServer.configureHoldingRegisters(START_REG, HOLD_REG_CNT);
+  ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
 #endif
 }
 
 void loop() {
-  unsigned target;
   encoder_poll();
 
 #if MODBUS_ON
@@ -49,7 +52,7 @@ void loop() {
   ModbusRTUServer.holdingRegisterWrite(ENC_MAX_STEP_REG, encoder_max());
   ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
   
-  target = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
+  target_pos = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
 
 
   // read the current value of the coil
@@ -67,16 +70,16 @@ void loop() {
   Switches sw = switches_poll();
   if (sw != S_STOP)
   {
-    target = encoder_position();
+    target_pos = encoder_position();
 #if MODBUS_ON
-    ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target);
+    ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
 #endif
   }
   
   if (sw == S_RESET_ENC)
     encoder_reset();
 
-  int delta = target - encoder_position();
+  int delta = target_pos - encoder_position();
 
   if (delta > ENC_HYST || sw == S_UP)
     motor_poll(MS_UP);
