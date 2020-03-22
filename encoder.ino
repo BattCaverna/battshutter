@@ -61,6 +61,13 @@ int encoder_max()
   return encoder_max_pos;
 }
 
+void encoder_setMax(int new_max)
+{
+  if (new_max < 1)
+    new_max = 1;
+  encoder_max_pos = new_max;
+}
+
 
 void encoder_poll()
 {
