@@ -14,20 +14,25 @@ Switches switches_poll();
 
 Switches switches_poll()
 {
+  long now = millis();
+  
+  if (encoder_moving())
+    down_press_start = now;
+    
   if (digitalRead(UP_SWITCH) == 0)
   {
-    down_press_start = millis();
+    down_press_start = now;
     return S_UP;
   }
   else if (digitalRead(DOWN_SWITCH) == 0)
   {
-    // Check if we have reached the bottom home position: if we keep pressing the button an
+    // Check if we have reached the bottom home position: if we keep pressing the button
     // return an encoder reset event.
-    if (millis() - down_press_start > RESET_ENC_TIME && !encoder_moving())
+    if (now - down_press_start > RESET_ENC_TIME && !encoder_moving())
       return S_RESET_ENC;
     return S_DOWN;
   }
 
-  down_press_start = millis();
+  down_press_start = now;
   return S_STOP;
 }
