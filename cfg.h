@@ -8,7 +8,7 @@
 #define ADDR0 3 // D3
 #define ADDR1 4 // D3
 #define ADDR2 5 // D3
-#define BASE_ADDR 0x10 // Mobbus start address when pin address=0
+#define BASE_ADDR 0x10 // Modbus start address when pin address=0
 
 #define LED_COIL_REG 0x00
 
@@ -30,7 +30,8 @@ enum HoldingRegs
 // Switches
 #define UP_SWITCH   A2
 #define DOWN_SWITCH A1
-// If we keep pressing the down button when we reach home, a reset
+// If we keep pressing the down button when we reach home,
+// an encoder reset is performed
 #define RESET_ENC_TIME 10000 //ms
 
 // RS485
@@ -39,7 +40,7 @@ enum HoldingRegs
 
 // Encoder
 #define ENC_PIN 2 //D2
-// Position tolerance when reaching target
+// Position tolerance when reaching target (%)
 #define ENC_HYST 0
 // Max time between two encoder edges, used to detect when we reach the home position
 #define MAX_ENC_PERIOD 2000 //ms
