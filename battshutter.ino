@@ -65,8 +65,8 @@ void loop() {
 
   val = ModbusRTUServer.holdingRegisterRead(ENC_STEP_REG);
   encoder_setCurr(val);
- 
- 
+
+
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);
 
