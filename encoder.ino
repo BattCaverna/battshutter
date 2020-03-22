@@ -90,7 +90,7 @@ void encoder_poll()
 // Positin in % (0 = closed, 100% = fully open)
 int encoder_position()
 {
-  return (encoder_curr_pos * 100 + encoder_max_pos / 2) / encoder_max_pos;
+  return (encoder_curr_pos * 100L + encoder_max_pos / 2) / encoder_max_pos;
 }
 
 // position in encoder steps
