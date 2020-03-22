@@ -45,10 +45,11 @@ void loop() {
   // poll for Modbus RTU requests
   ModbusRTUServer.poll();
 
-  ModbusRTUServer.holdingRegisterWrite(ENC_HOLD_REG, encoder_position());
-  ModbusRTUServer.holdingRegisterWrite(ENCMAX_HOLD_REG, encoder_max());
-
-  target = ModbusRTUServer.holdingRegisterRead(TARGET_HOLD_REG);
+  ModbusRTUServer.holdingRegisterWrite(ENC_STEP_REG, encoder_position_step());
+  ModbusRTUServer.holdingRegisterWrite(ENC_MAX_STEP_REG, encoder_max());
+  ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
+  
+  target = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
 
 
   // read the current value of the coil
@@ -68,7 +69,7 @@ void loop() {
   {
     target = encoder_position();
 #if MODBUS_ON
-    ModbusRTUServer.holdingRegisterWrite(TARGET_HOLD_REG, target);
+    ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target);
 #endif
   }
   

@@ -1,16 +1,39 @@
+#include <EEPROM.h>
 #include "motor.h"
 #include "cfg.h"
 
-static long encoder_curr_pos = 0;
+static int encoder_curr_pos = 0;
 static bool prev_encoder;
 static long last_edge;
-static long encoder_max_pos = 1;
+static long last_save;
+static int encoder_max_pos = 1;
+static int last_max_pos = 0;
+
+#define ENC_MAX_EEADDR 0
+
+static void encoder_eepSave()
+{
+  if (millis() - last_save > EEP_SAVE_INTERVAL)
+  {
+    if (last_max_pos != encoder_max_pos)
+      EEPROM.put(ENC_MAX_EEADDR, encoder_max_pos);
+
+    last_max_pos = encoder_max_pos;
+    last_save = millis();
+  }
+}
 
 void encoder_init()
 {
   pinMode(ENC_PIN, INPUT_PULLUP);
   prev_encoder = digitalRead(ENC_PIN);
   last_edge = 0;
+  last_save = 0;
+  EEPROM.get(ENC_MAX_EEADDR, encoder_max_pos);
+
+  // Check if eeprom is valid
+  if (encoder_max_pos < 0)
+    encoder_max_pos = 1;
 }
 
 bool encoder_moving()
@@ -37,13 +60,13 @@ void encoder_poll()
   {
     //Positive edge
     last_edge = millis();
-    
+
     if (motor_direction() == MS_DOWN)
       encoder_curr_pos--;
     else if (motor_direction() == MS_UP)
       encoder_curr_pos++;
   }
-  
+
   if (encoder_curr_pos < 0)
     encoder_curr_pos = 0;
 
@@ -51,9 +74,18 @@ void encoder_poll()
     encoder_max_pos = encoder_curr_pos;
 
   prev_encoder = state;
+
+  encoder_eepSave();
 }
 
+// Positin in % (0 = closed, 100% = fully open)
 int encoder_position()
 {
   return (encoder_curr_pos * 100 + encoder_max_pos / 2) / encoder_max_pos;
+}
+
+// position in encoder steps
+long encoder_position_step()
+{
+  return encoder_curr_pos;
 }
