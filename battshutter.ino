@@ -53,7 +53,11 @@ void loop() {
   ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
 
   target_pos = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
+  if (target_pos < 0)
+    target_pos = 0;
 
+  if (target_pos > 100)
+    target_pos = 100;
 
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);
