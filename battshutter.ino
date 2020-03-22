@@ -60,8 +60,12 @@ void loop() {
   if (target_pos > 100)
     target_pos = 100;
 
-  int max_enc = ModbusRTUServer.holdingRegisterRead(ENC_MAX_STEP_REG);
-  encoder_setMax(max_enc);
+  int val = ModbusRTUServer.holdingRegisterRead(ENC_MAX_STEP_REG);
+  encoder_setMax(val);
+
+  val = ModbusRTUServer.holdingRegisterRead(ENC_STEP_REG);
+  encoder_setCurr(val);
+ 
  
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);

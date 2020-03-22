@@ -68,6 +68,13 @@ void encoder_setMax(int new_max)
   encoder_max_pos = new_max;
 }
 
+void encoder_setCurr(int new_curr)
+{
+  if (new_curr < 0)
+    new_curr = 0;
+  encoder_curr_pos = new_curr;
+}
+
 
 void encoder_poll()
 {
