@@ -42,7 +42,7 @@ enum HoldingRegs
 // Position tolerance when reaching target
 #define ENC_HYST 0
 // Max time between two encoder edges, used to detect when we reach the home position
-#define MAX_ENC_PERIOD 1000 //ms
+#define MAX_ENC_PERIOD 2000 //ms
 // Time interval between eeprom updates
 #define EEP_SAVE_INTERVAL 5000 // ms
 
