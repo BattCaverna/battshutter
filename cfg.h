@@ -17,8 +17,9 @@
 
 enum HoldingRegs
 {
-  ENC_HOLD_REG = START_REG, // Encoder
-  TARGET_HOLD_REG, // Target position
+  ENC_HOLD_REG = START_REG, // Encoder: current position (%)
+  ENCMAX_HOLD_REG, // Encoder: max position (steps)
+  TARGET_HOLD_REG, // Target position to reach (%)
   HOLD_REG_END
 };
 
@@ -27,6 +28,8 @@ enum HoldingRegs
 // Switches
 #define UP_SWITCH   A2
 #define DOWN_SWITCH A1
+// If we keep pressing the down button when we reach home, a reset
+#define RESET_ENC_TIME 5000 //ms
 
 // RS485
 #define DE_RS485 A0
@@ -34,11 +37,16 @@ enum HoldingRegs
 
 // Encoder
 #define ENC_PIN 2 //D2
+// Position tolerance when reaching target
 #define ENC_HYST 0
+// Max time between two encoder edges, used to detect when we reach the home position
+#define MAX_ENC_PERIOD 1000 //ms
+
 
 //Motor
 #define MOTOR_PWR 9 // D9
 #define MOTOR_DIR 8 // D8
+// Time before switching on the mains when changing direction
 #define GUARD_TIME 500 //ms
 
 

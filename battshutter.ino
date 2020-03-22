@@ -6,6 +6,7 @@
 
 #include "cfg.h"
 
+
 void setup() {
   Serial.begin(MODBUS_BAUDRATE);
   uint8_t addr = addr_init();
@@ -37,34 +38,18 @@ void setup() {
 }
 
 void loop() {
-  int target = encoder_poll();
-  bool upd_target = false;
-  
-  switch (switches_poll())
-  {
-    case S_UP:
-      target += (ENC_HYST + 1);
-      upd_target = true;
-      break;
-    case S_DOWN:
-      target -= (ENC_HYST + 1);
-      upd_target = true;
-      break;
-    default:
-      break;
-  }
-
-  if (upd_target)
-    ModbusRTUServer.holdingRegisterWrite(TARGET_HOLD_REG, target);
+  unsigned target;
+  encoder_poll();
 
 #if MODBUS_ON
   // poll for Modbus RTU requests
   ModbusRTUServer.poll();
 
   ModbusRTUServer.holdingRegisterWrite(ENC_HOLD_REG, encoder_position());
+  ModbusRTUServer.holdingRegisterWrite(ENCMAX_HOLD_REG, encoder_max());
 
   target = ModbusRTUServer.holdingRegisterRead(TARGET_HOLD_REG);
-  
+
 
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);
@@ -78,11 +63,23 @@ void loop() {
   }
 #endif
 
-  int delta = target - encoder_position();
+  Switches sw = switches_poll();
+  if (sw != S_STOP)
+  {
+    target = encoder_position();
+#if MODBUS_ON
+    ModbusRTUServer.holdingRegisterWrite(TARGET_HOLD_REG, target);
+#endif
+  }
   
-  if (delta > ENC_HYST)
+  if (sw == S_RESET_ENC)
+    encoder_reset();
+
+  int delta = target - encoder_position();
+
+  if (delta > ENC_HYST || sw == S_UP)
     motor_poll(MS_UP);
-  else if (delta < -ENC_HYST)
+  else if (delta < -ENC_HYST || sw == S_DOWN)
     motor_poll(MS_DOWN);
   else
     motor_poll(MS_STOP);
