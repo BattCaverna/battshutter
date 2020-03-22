@@ -21,7 +21,7 @@ enum HoldingRegs
   ENC_MAX_STEP_REG,         // Encoder: max position (steps)
   ENC_POS_REG ,             // Encoder: current position (%)
   TARGET_REG,               // Target position to reach (%)
-  
+
   HOLD_REG_END
 };
 

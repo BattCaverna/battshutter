@@ -8,14 +8,14 @@ uint8_t addr_init()
 
   addr |= (digitalRead(ADDR2) ? 0 : 1);
   addr <<= 1;
-  
+
   addr |= (digitalRead(ADDR1) ? 0 : 1);
   addr <<= 1;
 
   addr |= (digitalRead(ADDR0) ? 0 : 1);
-  
+
   // Only 3 bits address
   addr &= 0x07;
-  
+
   return BASE_ADDR + addr;
 }

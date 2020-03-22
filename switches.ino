@@ -27,7 +27,7 @@ Switches switches_poll()
       return S_RESET_ENC;
     return S_DOWN;
   }
-  
+
   down_press_start = millis();
   return S_STOP;
 }

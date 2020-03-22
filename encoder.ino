@@ -38,10 +38,10 @@ void encoder_init()
   EEPROM.get(ENC_MAX_EEADDR + sizeof(encoder_max_pos), encoder_curr_pos);
 
   // Check if eeprom is valid
-    if (encoder_max_pos < 0)
-      encoder_max_pos = 1;
+  if (encoder_max_pos < 0)
+    encoder_max_pos = 1;
 
-   if (encoder_curr_pos < 0)
+  if (encoder_curr_pos < 0)
     encoder_curr_pos = 0;
 }
 

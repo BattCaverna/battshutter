@@ -51,7 +51,7 @@ void loop() {
   ModbusRTUServer.holdingRegisterWrite(ENC_STEP_REG, encoder_position_step());
   ModbusRTUServer.holdingRegisterWrite(ENC_MAX_STEP_REG, encoder_max());
   ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
-  
+
   target_pos = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
 
 
@@ -75,7 +75,7 @@ void loop() {
     ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
 #endif
   }
-  
+
   if (sw == S_RESET_ENC)
     encoder_reset();
 
