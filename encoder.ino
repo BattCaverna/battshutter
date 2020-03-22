@@ -56,7 +56,7 @@ void encoder_reset()
   encoder_max_pos = 1;
 }
 
-long encoder_max()
+int encoder_max()
 {
   return encoder_max_pos;
 }
@@ -94,7 +94,7 @@ int encoder_position()
 }
 
 // position in encoder steps
-long encoder_position_step()
+int encoder_position_step()
 {
   return encoder_curr_pos;
 }
