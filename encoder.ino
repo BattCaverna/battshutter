@@ -3,6 +3,7 @@
 #include "cfg.h"
 
 static int encoder_curr_pos = 0;
+static int last_curr_pos = 0;
 static bool prev_encoder;
 static long last_edge;
 static long last_save;
@@ -18,6 +19,10 @@ static void encoder_eepSave()
     if (last_max_pos != encoder_max_pos)
       EEPROM.put(ENC_MAX_EEADDR, encoder_max_pos);
 
+    if (last_curr_pos != encoder_curr_pos)
+      EEPROM.put(ENC_MAX_EEADDR + sizeof(encoder_max_pos), encoder_curr_pos);
+
+    last_curr_pos = encoder_curr_pos;
     last_max_pos = encoder_max_pos;
     last_save = millis();
   }
@@ -30,10 +35,14 @@ void encoder_init()
   last_edge = 0;
   last_save = 0;
   EEPROM.get(ENC_MAX_EEADDR, encoder_max_pos);
+  EEPROM.get(ENC_MAX_EEADDR + sizeof(encoder_max_pos), encoder_curr_pos);
 
   // Check if eeprom is valid
-  if (encoder_max_pos < 0)
-    encoder_max_pos = 1;
+    if (encoder_max_pos < 0)
+      encoder_max_pos = 1;
+
+   if (encoder_curr_pos < 0)
+    encoder_curr_pos = 0;
 }
 
 bool encoder_moving()
