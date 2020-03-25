@@ -6,8 +6,8 @@
 
 //Modbus address
 #define ADDR0 3 // D3
-#define ADDR1 4 // D3
-#define ADDR2 5 // D3
+#define ADDR1 4 // D4
+#define ADDR2 5 // D5
 #define BASE_ADDR 0x10 // Modbus start address when pin address=0
 
 #define LED_COIL_REG 0x00
