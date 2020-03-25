@@ -30,7 +30,7 @@ static void encoder_eepSave()
 
 void encoder_init()
 {
-  pinMode(ENC_PIN, INPUT_PULLUP);
+  pinMode(ENC_PIN, INPUT);
   prev_encoder = digitalRead(ENC_PIN);
   last_edge = 0;
   last_save = 0;
