@@ -1,6 +1,7 @@
 #ifndef CFG_H
 #define CFG_H
 
+#define DISABLE485 0
 #define MODBUS_ON 1
 #define MODBUS_BAUDRATE 9600
 
@@ -35,8 +36,13 @@ enum HoldingRegs
 #define RESET_ENC_TIME 10000 //ms
 
 // RS485
-#define DE_RS485 A0
-#define RE_RS485 A3
+#if DISABLE485
+  #define DE_RS485 6 // D6
+  #define RE_RS485 7 // D7
+#else
+  #define DE_RS485 A0
+  #define RE_RS485 A3
+#endif
 
 // Encoder
 #define ENC_PIN 2 //D2
