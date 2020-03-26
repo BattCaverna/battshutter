@@ -5,6 +5,7 @@
 static int encoder_curr_pos = 0;
 static int last_curr_pos = 0;
 static bool prev_encoder;
+static bool do_pulse;
 static long last_edge;
 static long last_save;
 static int encoder_max_pos = 1;
@@ -76,25 +77,35 @@ void encoder_setCurr(int new_curr)
 }
 
 
+#define ENC_DEBOUNCE_TIME 50 //ms
+
 void encoder_poll()
 {
   bool state = digitalRead(ENC_PIN);
-  if (state && !prev_encoder)
+  
+  if (!state && prev_encoder)
   {
-    //Positive edge
+    // falling edge
     last_edge = millis();
+    do_pulse = true;
+  }
 
+
+  if (millis() - last_edge > ENC_DEBOUNCE_TIME && do_pulse)
+  {
+    do_pulse = false;
+    
     if (motor_direction() == MS_DOWN)
       encoder_curr_pos--;
     else if (motor_direction() == MS_UP)
       encoder_curr_pos++;
+
+    if (encoder_curr_pos < 0)
+      encoder_curr_pos = 0;
+
+    if (encoder_curr_pos > encoder_max_pos)
+      encoder_max_pos = encoder_curr_pos;
   }
-
-  if (encoder_curr_pos < 0)
-    encoder_curr_pos = 0;
-
-  if (encoder_curr_pos > encoder_max_pos)
-    encoder_max_pos = encoder_curr_pos;
 
   prev_encoder = state;
 
