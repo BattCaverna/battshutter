@@ -60,6 +60,9 @@ void loop() {
   if (target_pos > 100)
     target_pos = 100;
 
+  // Rewrite clamped target
+  ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
+
   int val = ModbusRTUServer.holdingRegisterRead(ENC_MAX_STEP_REG);
   encoder_setMax(val);
 
