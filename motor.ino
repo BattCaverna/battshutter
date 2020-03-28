@@ -14,7 +14,7 @@ typedef MotorFSM (*motor_fsm_t)(MotorDir);
 
 static long prev_move;
 static MotorDir last_cmd;
-static bool motor_timeout;
+static MotorDir motor_timeout;
 static bool encoder_working;
 
 static MotorFSM fsm_stop(MotorDir val);
@@ -44,7 +44,7 @@ void motor_init()
   digitalWrite(MOTOR_DIR, MOTOR_UP);
   curr_state = MFSM_STOP;
   last_cmd = MS_STOP;
-  motor_timeout = false;
+  motor_timeout = MS_STOP;
   encoder_working = false;
 }
 
@@ -101,7 +101,7 @@ static MotorFSM fsm_wait_move(MotorDir val)
   if (millis() - prev_move >= GUARD_TIME)
   {
     digitalWrite(MOTOR_PWR, MOTOR_ON);
-    motor_timeout = false;
+    motor_timeout = MS_STOP;
     return MFSM_MOVE;
   }
 
@@ -121,7 +121,7 @@ static MotorFSM fsm_move(MotorDir val)
   if (millis() - prev_move > (MOTOR_TIMEOUT * 1000L))
   {
     digitalWrite(MOTOR_PWR, MOTOR_OFF);
-    motor_timeout = true;
+    motor_timeout = last_cmd;
     prev_move = millis();
   }
 
@@ -149,11 +149,15 @@ MotorDir motor_position();
 
 MotorDir motor_position()
 {
-  if ((encoder_working && encoder_position() == 100) || (last_cmd == MS_UP && motor_timeout))
-    return MS_UP;
-
-  if ((encoder_working && encoder_position() == 0) || (last_cmd == MS_DOWN && motor_timeout))
-    return MS_DOWN;
-
-  return MS_STOP;
+  if (encoder_working)
+  {
+    if (encoder_position() == 100)
+      return MS_UP;
+    else if (encoder_position() == 0)
+      return MS_DOWN;
+    else
+      return MS_STOP;
+  }
+  else
+    return motor_timeout;
 }
