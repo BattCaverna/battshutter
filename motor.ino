@@ -139,7 +139,7 @@ static MotorFSM fsm_wait_stop(MotorDir val)
   return MFSM_WAIT_STOP;
 }
 
-MotorDir motor_direction()
+MotorDir motor_currentDirection()
 {
   return last_cmd;
 }

@@ -9,7 +9,7 @@ typedef enum MotorDir
   MS_CNT
 } MotorDir;
 
-MotorDir motor_direction();
+MotorDir motor_currentDirection();
 void motor_poll(MotorDir val);
 MotorDir motor_position();
 

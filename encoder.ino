@@ -95,9 +95,9 @@ void encoder_poll()
   {
     do_pulse = false;
     
-    if (motor_direction() == MS_DOWN)
+    if (motor_currentDirection() == MS_DOWN)
       encoder_curr_pos--;
-    else if (motor_direction() == MS_UP)
+    else if (motor_currentDirection() == MS_UP)
       encoder_curr_pos++;
 
     if (encoder_curr_pos < 0)
