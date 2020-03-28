@@ -107,7 +107,7 @@ void loop() {
 
   if (delta > ENC_HYST || sw == S_UP)
     motor_poll(MS_UP);
-  else if (delta < -ENC_HYST || sw == S_DOWN)
+  else if (delta < -ENC_HYST || sw == S_DOWN || sw == S_RESET_ENC)
     motor_poll(MS_DOWN);
   else
     motor_poll(MS_STOP);
