@@ -9,6 +9,7 @@
 
 unsigned target_pos;
 long last_modbus_poll;
+Switches last_sw;
 
 void setup() {
   Serial.begin(MODBUS_BAUDRATE);
@@ -23,6 +24,7 @@ void setup() {
   target_pos = encoder_position();
   motor_init();
   switches_init();
+  last_sw = switches_poll();
 
 #if MODBUS_ON
   RS485.setPins(RS485_DEFAULT_TX_PIN, DE_RS485, RE_RS485);
@@ -95,7 +97,9 @@ void loop() {
   Switches sw = switches_poll();
 
 #if MODBUS_ON
-  if (sw == S_STOP)
+
+  // Only consider modbus switches if there aren't any manual ones
+  if (sw == last_sw && sw == S_STOP)
   {
     sw = (Switches)ModbusRTUServer.holdingRegisterRead(MANUAL_SWITCH_REG);
 
@@ -105,9 +109,12 @@ void loop() {
     if (sw >= S_CNT)
       sw = (Switches)(S_CNT - 1);
   }
+  else
+    last_sw = sw;
 
   ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, (int)sw);
 #endif
+
 
   if (sw != S_STOP)
   {
