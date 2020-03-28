@@ -23,6 +23,8 @@ enum HoldingRegs
   ENC_MAX_STEP_REG,         // Encoder: max position (steps)
   ENC_POS_REG ,             // Encoder: current position (%)
   TARGET_REG,               // Target position to reach (%)
+  MANUAL_SWITCH_REG,        // Simulate switches through modbus
+  MOTOR_POS_REG,            // Give information on motor position (based on timeout and direction)
 
   HOLD_REG_END
 };
@@ -59,7 +61,8 @@ enum HoldingRegs
 #define MOTOR_PWR 9 // D9
 #define MOTOR_DIR 8 // D8
 // Time before switching on the mains when changing direction
-#define GUARD_TIME 500 //ms
+#define GUARD_TIME 300 //ms
+#define MOTOR_TIMEOUT 40 //s
 
 
 #endif

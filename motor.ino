@@ -13,7 +13,9 @@ typedef enum
 typedef MotorFSM (*motor_fsm_t)(MotorDir);
 
 static long prev_move;
-static MotorDir last_button;
+static MotorDir last_cmd;
+static bool motor_timeout;
+static bool encoder_working;
 
 static MotorFSM fsm_stop(MotorDir val);
 static MotorFSM fsm_wait_move(MotorDir val);
@@ -41,7 +43,9 @@ void motor_init()
   pinMode(MOTOR_DIR, OUTPUT);
   digitalWrite(MOTOR_DIR, MOTOR_UP);
   curr_state = MFSM_STOP;
-  last_button = MS_STOP;
+  last_cmd = MS_STOP;
+  motor_timeout = false;
+  encoder_working = false;
 }
 
 static void motor_setDir(MotorDir dir);
@@ -66,7 +70,7 @@ void motor_poll(MotorDir val)
 
 static MotorFSM fsm_stop(MotorDir val)
 {
-  last_button = val;
+  last_cmd = val;
   if (val == MS_STOP)
   {
     digitalWrite(MOTOR_PWR, MOTOR_OFF);
@@ -75,7 +79,7 @@ static MotorFSM fsm_stop(MotorDir val)
 
   motor_setDir(val);
   prev_move = millis();
-
+  
   return MFSM_WAIT_MOVE;
 }
 
@@ -87,16 +91,17 @@ static MotorFSM fsm_wait_move(MotorDir val)
     return MFSM_STOP;
   }
 
-  if (val != last_button)
+  if (val != last_cmd)
   {
     motor_setDir(val);
     prev_move = millis();
-    last_button = val;
+    last_cmd = val;
   }
 
   if (millis() - prev_move >= GUARD_TIME)
   {
     digitalWrite(MOTOR_PWR, MOTOR_ON);
+    motor_timeout = false;
     return MFSM_MOVE;
   }
 
@@ -105,11 +110,19 @@ static MotorFSM fsm_wait_move(MotorDir val)
 
 static MotorFSM fsm_move(MotorDir val)
 {
-  if (val != last_button)
+  encoder_working = encoder_moving();
+  if (val != last_cmd)
   {
     digitalWrite(MOTOR_PWR, MOTOR_OFF);
     prev_move = millis();
     return MFSM_WAIT_STOP;
+  }
+
+  if (millis() - prev_move > (MOTOR_TIMEOUT * 1000L))
+  {
+    digitalWrite(MOTOR_PWR, MOTOR_OFF);
+    motor_timeout = true;
+    prev_move = millis();
   }
 
   return MFSM_MOVE;
@@ -128,5 +141,19 @@ static MotorFSM fsm_wait_stop(MotorDir val)
 
 MotorDir motor_direction()
 {
-  return last_button;
+  return last_cmd;
+}
+
+
+MotorDir motor_position();
+
+MotorDir motor_position()
+{
+  if ((encoder_working && encoder_position() == 100) || (last_cmd == MS_UP && motor_timeout))
+    return MS_UP;
+
+  if ((encoder_working && encoder_position() == 0) || (last_cmd == MS_DOWN && motor_timeout))
+    return MS_DOWN;
+
+  return MS_STOP;
 }

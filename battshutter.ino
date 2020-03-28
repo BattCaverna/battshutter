@@ -40,6 +40,7 @@ void setup() {
   // configure registers
   ModbusRTUServer.configureHoldingRegisters(START_REG, HOLD_REG_CNT);
   ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
+  ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, S_STOP);
 #endif
 }
 
@@ -50,9 +51,10 @@ void loop() {
   ModbusRTUServer.holdingRegisterWrite(ENC_STEP_REG, encoder_position_step());
   ModbusRTUServer.holdingRegisterWrite(ENC_MAX_STEP_REG, encoder_max());
   ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
+  ModbusRTUServer.holdingRegisterWrite(MOTOR_POS_REG, motor_position());
 
 
-  // Poll modbus only once every MODBUS_POLL_TIME ms, otherwise 
+  // Poll modbus only once every MODBUS_POLL_TIME ms, otherwise
   // we may reply too fast. The master needs some time (few ms)
   // to switch off the TX and turn the RX on.
   if (millis() - last_modbus_poll > MODBUS_POLL_TIME)
@@ -78,7 +80,6 @@ void loop() {
   val = ModbusRTUServer.holdingRegisterRead(ENC_STEP_REG);
   encoder_setCurr(val);
 
-
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);
 
@@ -92,6 +93,22 @@ void loop() {
 #endif
 
   Switches sw = switches_poll();
+
+#if MODBUS_ON
+  if (sw == S_STOP)
+  {
+    sw = (Switches)ModbusRTUServer.holdingRegisterRead(MANUAL_SWITCH_REG);
+
+    if (sw < S_STOP)
+      sw = S_STOP;
+
+    if (sw >= S_CNT)
+      sw = (Switches)(S_CNT - 1);
+  }
+
+  ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, (int)sw);
+#endif
+
   if (sw != S_STOP)
   {
     target_pos = encoder_position();
