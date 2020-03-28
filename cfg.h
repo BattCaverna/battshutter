@@ -34,6 +34,7 @@ enum HoldingRegs
 // Switches
 #define UP_SWITCH   A2
 #define DOWN_SWITCH A1
+#define LONG_PRESS_TIME 2000 //ms
 // If we keep pressing the down button when we reach home,
 // an encoder reset is performed
 #define RESET_ENC_TIME 10000 //ms
