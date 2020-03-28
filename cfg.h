@@ -40,11 +40,11 @@ enum HoldingRegs
 
 // RS485
 #if DISABLE485
-  #define DE_RS485 6 // D6
-  #define RE_RS485 7 // D7
+#define DE_RS485 6 // D6
+#define RE_RS485 7 // D7
 #else
-  #define DE_RS485 A0
-  #define RE_RS485 A3
+#define DE_RS485 A0
+#define RE_RS485 A3
 #endif
 
 // Encoder

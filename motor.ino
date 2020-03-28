@@ -79,7 +79,7 @@ static MotorFSM fsm_stop(MotorDir val)
 
   motor_setDir(val);
   prev_move = millis();
-  
+
   return MFSM_WAIT_MOVE;
 }
 

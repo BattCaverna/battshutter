@@ -82,7 +82,7 @@ void encoder_setCurr(int new_curr)
 void encoder_poll()
 {
   bool state = digitalRead(ENC_PIN);
-  
+
   if (!state && prev_encoder)
   {
     // falling edge
@@ -94,7 +94,7 @@ void encoder_poll()
   if (millis() - last_edge > ENC_DEBOUNCE_TIME && do_pulse)
   {
     do_pulse = false;
-    
+
     if (motor_currentDirection() == MS_DOWN)
       encoder_curr_pos--;
     else if (motor_currentDirection() == MS_UP)

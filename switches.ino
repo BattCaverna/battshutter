@@ -15,10 +15,10 @@ Switches switches_poll();
 Switches switches_poll()
 {
   long now = millis();
-  
+
   if (encoder_moving())
     down_press_start = now;
-    
+
   if (digitalRead(UP_SWITCH) == 0)
   {
     down_press_start = now;
