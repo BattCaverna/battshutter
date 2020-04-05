@@ -8,7 +8,6 @@
 
 
 unsigned target_pos;
-long last_modbus_poll;
 Switches last_sw;
 
 void setup() {
@@ -32,7 +31,6 @@ void setup() {
   if (!ModbusRTUServer.begin(addr, MODBUS_BAUDRATE)) {
     Serial.println("Failed to start Modbus RTU Server!");
     while (1);
-    last_modbus_poll = millis();
   }
 
   // configure builtin led
@@ -55,16 +53,7 @@ void loop() {
   ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
   ModbusRTUServer.holdingRegisterWrite(MOTOR_POS_REG, motor_position());
 
-
-  // Poll modbus only once every MODBUS_POLL_TIME ms, otherwise
-  // we may reply too fast. The master needs some time (few ms)
-  // to switch off the TX and turn the RX on.
-  if (millis() - last_modbus_poll > MODBUS_POLL_TIME)
-  {
-    ModbusRTUServer.poll();
-    last_modbus_poll = millis();
-  }
-
+  ModbusRTUServer.poll();
 
   target_pos = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
   if (target_pos < 0)

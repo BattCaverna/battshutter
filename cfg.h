@@ -4,7 +4,6 @@
 #define DISABLE485 0
 #define MODBUS_ON 1
 #define MODBUS_BAUDRATE 9600
-#define MODBUS_POLL_TIME 25 //ms
 
 //Modbus address
 #define ADDR0 3 // D3
