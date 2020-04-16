@@ -10,6 +10,7 @@ static long last_edge;
 static long last_save;
 static int encoder_max_pos = 1;
 static int last_max_pos = 0;
+static bool encoder_working = true;
 
 #define ENC_MAX_EEADDR 0
 
@@ -44,6 +45,11 @@ void encoder_init()
 
   if (encoder_curr_pos < 0)
     encoder_curr_pos = 0;
+}
+
+void encoder_resetWorking()
+{
+  encoder_working = false;
 }
 
 bool encoder_moving()
@@ -94,6 +100,7 @@ void encoder_poll()
   if (millis() - last_edge > ENC_DEBOUNCE_TIME && do_pulse)
   {
     do_pulse = false;
+    encoder_working = true;
 
     if (motor_currentDirection() == MS_DOWN)
       encoder_curr_pos--;
@@ -115,7 +122,21 @@ void encoder_poll()
 // Positin in % (0 = closed, 100% = fully open)
 int encoder_position()
 {
-  return (encoder_curr_pos * 100L + encoder_max_pos / 2) / encoder_max_pos;
+  // Use motor timeout as an heuristic if encoder is not connected
+  if  ((millis() - last_edge > MAX_ENC_PERIOD) && !encoder_working)
+  {
+    switch (motor_position())
+    {
+      case MP_ALL_DOWN:
+        return 0;
+      case MP_ALL_UP:
+        return 100;
+      default:
+        return 50;
+    }
+  }
+  else
+    return (encoder_curr_pos * 100L + encoder_max_pos / 2) / encoder_max_pos;
 }
 
 // position in encoder steps
