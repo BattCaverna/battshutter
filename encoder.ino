@@ -6,13 +6,13 @@ static bool prev_encoder;
 static bool do_pulse;
 static long last_edge;
 static int last_max_pos = 0;
-static bool encoder_working = true;
+static bool encoder_working = false;
 
 void encoder_init()
 {
   pinMode(ENC_PIN, INPUT);
   prev_encoder = digitalRead(ENC_PIN);
-  last_edge = 0;
+  last_edge = millis() - MAX_ENC_PERIOD - 1;
 }
 
 void encoder_resetWorking()
