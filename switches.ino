@@ -13,7 +13,7 @@ Switches switches_poll();
 
 static bool switches_debounce(Switches curr_sw)
 {
-  static Switches prev_sw = S_STOP;
+  static Switches prev_sw = S_NONE;
   static long last_key_start = 0;
 
   long now = millis();
@@ -28,8 +28,8 @@ static bool switches_debounce(Switches curr_sw)
 
 Switches switches_poll()
 {
-  static Switches prev_sw = S_STOP;
-  static Switches long_press = S_STOP;
+  static Switches prev_sw = S_NONE;
+  static Switches long_press = S_NONE;
   static long last_key_start = 0;
   static long down_press_start = 0;
 
@@ -57,7 +57,7 @@ Switches switches_poll()
   else
   {
     down_press_start = now;
-    curr_sw = S_STOP;
+    curr_sw = S_NONE;
   }
 
   // Debounce
@@ -68,23 +68,23 @@ Switches switches_poll()
   if (prev_sw != curr_sw)
   {
     last_key_start = now;
-    if (curr_sw != S_STOP)
-      long_press = S_STOP;
+    if (curr_sw != S_NONE)
+      long_press = S_NONE;
   }
   else
   {
-    if (now - last_key_start > LONG_PRESS_TIME && curr_sw != S_STOP)
+    if (now - last_key_start > LONG_PRESS_TIME && curr_sw != S_NONE)
       long_press = curr_sw;
 
     // Avoid keeping key pressed forever.
     // Use MOTOR_TIMEOUT +10%
     if (now - last_key_start > (long)(1.1 * MOTOR_TIMEOUT * 1000))
-      long_press = S_STOP;
+      long_press = S_NONE;
   }
 
   prev_sw = curr_sw;
 
-  if (long_press != S_STOP)
+  if (long_press != S_NONE)
     return long_press;
   else
     return curr_sw;

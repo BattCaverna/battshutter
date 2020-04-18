@@ -41,7 +41,7 @@ void setup() {
   // configure registers
   ModbusRTUServer.configureHoldingRegisters(START_REG, HOLD_REG_CNT);
   ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
-  ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, S_STOP);
+  ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, S_NONE);
 #endif
 }
 
@@ -104,30 +104,39 @@ void loop() {
 #if MODBUS_ON
 
   // Only consider modbus switches if there aren't any manual ones
-  if (sw == last_sw && sw == S_STOP)
+  if (sw == last_sw && sw == S_NONE)
   {
     sw = (Switches)ModbusRTUServer.holdingRegisterRead(MANUAL_SWITCH_REG);
 
-    if (sw < S_STOP)
-      sw = S_STOP;
+    if (sw < S_NONE)
+      sw = S_NONE;
 
     if (sw >= S_CNT)
       sw = (Switches)(S_CNT - 1);
   }
   else
     last_sw = sw;
-
-  ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, (int)sw);
 #endif
 
 
-  if (sw != S_STOP)
+  if (sw != S_NONE)
   {
     target_pos = encoder_position();
+
+    // Ack stop moving
+    if (sw == S_STOPMOVING)
+    {
+      sw = S_NONE;
+      last_sw = sw;
+    }
+      
 #if MODBUS_ON
     ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
-#endif
   }
+  ModbusRTUServer.holdingRegisterWrite(MANUAL_SWITCH_REG, (int)sw);
+#else
+  }
+#endif
 
   if (sw == S_RESET_ENC)
   {
