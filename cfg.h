@@ -24,6 +24,7 @@ enum HoldingRegs
   TARGET_REG,               // Target position to reach (%)
   MANUAL_SWITCH_REG,        // Simulate switches through modbus
   MOTOR_POS_REG,            // Give information on motor position (based on timeout and direction)
+  MOTOR_MAX_REG,            // Motor: max position (ms)
 
   HOLD_REG_END
 };

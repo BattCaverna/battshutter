@@ -52,6 +52,7 @@ void loop() {
   ModbusRTUServer.holdingRegisterWrite(ENC_MAX_STEP_REG, encoder_max());
   ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
   ModbusRTUServer.holdingRegisterWrite(MOTOR_POS_REG, motor_position());
+  ModbusRTUServer.holdingRegisterWrite(MOTOR_MAX_REG, motor_max());
 
   ModbusRTUServer.poll();
 
@@ -114,7 +115,10 @@ void loop() {
   }
 
   if (sw == S_RESET_ENC)
+  {
     encoder_reset();
+    motor_scheduleCalibration();
+  }
 
   int delta = target_pos - encoder_position();
 

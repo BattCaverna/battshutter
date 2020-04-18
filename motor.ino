@@ -35,6 +35,12 @@ static MotorFSM curr_state;
 #define MOTOR_UP   LOW
 #define MOTOR_DOWN HIGH
 
+static long motor_time;
+static long motor_start;
+static long motor_time_max = 30000;
+static bool motor_schedule_calibration = false;
+static bool motor_calibration = false;
+
 void motor_init()
 {
   pinMode(MOTOR_PWR, OUTPUT);
@@ -44,6 +50,7 @@ void motor_init()
   curr_state = MFSM_STOP;
   last_cmd = MS_STOP;
   motor_timeout = MP_MIDDLE;
+  motor_time = 0;
 }
 
 static void motor_setDir(MotorDir dir);
@@ -99,7 +106,10 @@ static MotorFSM fsm_wait_move(MotorDir val)
   if (millis() - prev_move >= GUARD_TIME)
   {
     digitalWrite(MOTOR_PWR, MOTOR_ON);
+    motor_start = millis();
     motor_timeout = MP_MIDDLE;
+    motor_calibration = motor_schedule_calibration;
+    motor_schedule_calibration = false;
     return MFSM_MOVE;
   }
 
@@ -108,13 +118,26 @@ static MotorFSM fsm_wait_move(MotorDir val)
 
 static MotorFSM fsm_move(MotorDir val)
 {
-
   if (val != last_cmd)
   {
     digitalWrite(MOTOR_PWR, MOTOR_OFF);
     prev_move = millis();
     return MFSM_WAIT_STOP;
   }
+
+  long delta = millis() - motor_start;
+  motor_start = millis();
+  if (val == MS_UP)
+    motor_time += delta;
+  else
+    motor_time -= delta;
+
+  motor_time = motor_time < 0 ? 0 : motor_time;
+  
+  if (motor_calibration)
+    motor_time_max = motor_time > motor_time_max ? motor_time : motor_time_max;
+  else
+    motor_time = motor_time > motor_time_max ? motor_time_max : motor_time;
 
   if (millis() - prev_move > (MOTOR_TIMEOUT * 1000L))
   {
@@ -144,10 +167,19 @@ MotorDir motor_currentDirection()
   return last_cmd;
 }
 
-
-MotorPos motor_position();
-
-MotorPos motor_position()
+int motor_position()
 {
-  return motor_timeout;
+  return (motor_time * 100L + motor_time_max / 2) / motor_time_max;
+}
+
+void motor_scheduleCalibration()
+{
+  motor_time = 0;
+  motor_time_max = 1;
+  motor_schedule_calibration = true;
+}
+
+long motor_max()
+{
+  return motor_time_max;
 }

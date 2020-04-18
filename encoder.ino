@@ -124,17 +124,7 @@ int encoder_position()
 {
   // Use motor timeout as an heuristic if encoder is not connected
   if  ((millis() - last_edge > MAX_ENC_PERIOD) && !encoder_working)
-  {
-    switch (motor_position())
-    {
-      case MP_ALL_DOWN:
-        return 0;
-      case MP_ALL_UP:
-        return 100;
-      default:
-        return 50;
-    }
-  }
+    return motor_position();
   else
     return (encoder_curr_pos * 100L + encoder_max_pos / 2) / encoder_max_pos;
 }
