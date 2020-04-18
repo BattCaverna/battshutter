@@ -35,9 +35,7 @@ static MotorFSM curr_state;
 #define MOTOR_UP   LOW
 #define MOTOR_DOWN HIGH
 
-static long motor_time;
 static long motor_start;
-static long motor_time_max = 30000;
 static bool motor_schedule_calibration = false;
 static bool motor_calibration = false;
 
@@ -50,7 +48,6 @@ void motor_init()
   curr_state = MFSM_STOP;
   last_cmd = MS_STOP;
   motor_timeout = MP_MIDDLE;
-  motor_time = 0;
 }
 
 static void motor_setDir(MotorDir dir);
@@ -128,16 +125,16 @@ static MotorFSM fsm_move(MotorDir val)
   long delta = millis() - motor_start;
   motor_start = millis();
   if (val == MS_UP)
-    motor_time += delta;
+    shutter_cfg.motor_time += delta;
   else
-    motor_time -= delta;
+    shutter_cfg.motor_time -= delta;
 
-  motor_time = motor_time < 0 ? 0 : motor_time;
+  shutter_cfg.motor_time = shutter_cfg.motor_time < 0 ? 0 : shutter_cfg.motor_time;
 
   if (motor_calibration)
-    motor_time_max = motor_time > motor_time_max ? motor_time : motor_time_max;
+    shutter_cfg.motor_time_max = shutter_cfg.motor_time > shutter_cfg.motor_time_max ? shutter_cfg.motor_time : shutter_cfg.motor_time_max;
   else
-    motor_time = motor_time > motor_time_max ? motor_time_max : motor_time;
+    shutter_cfg.motor_time = shutter_cfg.motor_time > shutter_cfg.motor_time_max ? shutter_cfg.motor_time_max : shutter_cfg.motor_time;
 
   if (millis() - prev_move > (MOTOR_TIMEOUT * 1000L))
   {
@@ -169,24 +166,24 @@ MotorDir motor_currentDirection()
 
 int motor_position()
 {
-  return (motor_time * 100L + motor_time_max / 2) / motor_time_max;
+  return (shutter_cfg.motor_time * 100L + shutter_cfg.motor_time_max / 2) / shutter_cfg.motor_time_max;
 }
 
 void motor_scheduleCalibration()
 {
-  motor_time = 0;
-  motor_time_max = 1;
+  shutter_cfg.motor_time = 0;
+  shutter_cfg.motor_time_max = 1;
   motor_schedule_calibration = true;
 }
 
 long motor_position_time()
 {
-  return motor_time;
+  return shutter_cfg.motor_time;
 }
 
 long motor_max()
 {
-  return motor_time_max;
+  return shutter_cfg.motor_time_max;
 }
 
 MotorPos motor_timeoutStatus();
@@ -200,8 +197,11 @@ void motor_setMax(long val)
 {
   if (val < 0)
     val = 0;
+    
+  if (val > MOTOR_TIMEOUT * 1000L)
+    val = MOTOR_TIMEOUT * 1000L;
 
-  motor_time_max = val;
+  shutter_cfg.motor_time_max = val;
 }
 
 void motor_setCurr(long val)
@@ -209,5 +209,5 @@ void motor_setCurr(long val)
   if (val < 0)
     val = 0;
 
-  motor_time = val;
+  shutter_cfg.motor_time = val;
 }

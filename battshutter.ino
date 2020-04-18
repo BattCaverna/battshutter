@@ -19,6 +19,7 @@ void setup() {
   Serial.println(addr);
 #endif
 
+  cfg_init();
   encoder_init();
   target_pos = encoder_position();
   motor_init();
@@ -46,6 +47,7 @@ void setup() {
 
 void loop() {
   encoder_poll();
+  cfg_update();
 
 #if MODBUS_ON
   ModbusRTUServer.holdingRegisterWrite(ENC_STEP_REG, encoder_position_step());
