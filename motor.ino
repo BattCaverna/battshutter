@@ -197,7 +197,7 @@ void motor_setMax(long val)
 {
   if (val < 0)
     val = 0;
-    
+
   if (val > MOTOR_TIMEOUT * 1000L)
     val = MOTOR_TIMEOUT * 1000L;
 
