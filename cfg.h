@@ -20,11 +20,12 @@ enum HoldingRegs
 {
   ENC_STEP_REG = START_REG, // Encoder: current position (steps)
   ENC_MAX_STEP_REG,         // Encoder: max position (steps)
-  ENC_POS_REG ,             // Encoder: current position (%)
+  CURR_POS_REG,             // Shutter current position (%)
   TARGET_REG,               // Target position to reach (%)
   MANUAL_SWITCH_REG,        // Simulate switches through modbus
-  MOTOR_POS_REG,            // Give information on motor position (based on timeout and direction)
-  MOTOR_MAX_REG,            // Motor: max position (ms)
+  MOTOR_TIMEOUT_REG,        // Give information on motor position (based on timeout and direction)
+  MOTOR_POS_REG,            // Motor: current position (s * 10)
+  MOTOR_MAX_REG,            // Motor: max position (s * 10)
 
   HOLD_REG_END
 };

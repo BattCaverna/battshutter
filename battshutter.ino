@@ -50,9 +50,14 @@ void loop() {
 #if MODBUS_ON
   ModbusRTUServer.holdingRegisterWrite(ENC_STEP_REG, encoder_position_step());
   ModbusRTUServer.holdingRegisterWrite(ENC_MAX_STEP_REG, encoder_max());
-  ModbusRTUServer.holdingRegisterWrite(ENC_POS_REG, encoder_position());
-  ModbusRTUServer.holdingRegisterWrite(MOTOR_POS_REG, motor_position());
-  ModbusRTUServer.holdingRegisterWrite(MOTOR_MAX_REG, motor_max());
+
+  ModbusRTUServer.holdingRegisterWrite(CURR_POS_REG, encoder_position());
+
+  ModbusRTUServer.holdingRegisterWrite(MOTOR_TIMEOUT_REG, motor_timeoutStatus());
+  int motor_pos = (motor_position_time() + 50) / 100;
+  ModbusRTUServer.holdingRegisterWrite(MOTOR_POS_REG, motor_pos);
+  int motor_max_pos = (motor_max() + 50) / 100;
+  ModbusRTUServer.holdingRegisterWrite(MOTOR_MAX_REG, motor_max_pos);
 
   ModbusRTUServer.poll();
 
@@ -71,6 +76,14 @@ void loop() {
 
   val = ModbusRTUServer.holdingRegisterRead(ENC_STEP_REG);
   encoder_setCurr(val);
+
+  val = ModbusRTUServer.holdingRegisterRead(MOTOR_MAX_REG);
+  if (val != motor_max_pos)
+    motor_setMax(val * 100L);
+
+  val = ModbusRTUServer.holdingRegisterRead(MOTOR_POS_REG);
+  if (val != motor_pos)
+    motor_setCurr(val * 100L);
 
   // read the current value of the coil
   int coilValue = ModbusRTUServer.coilRead(LED_COIL_REG);

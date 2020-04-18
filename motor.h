@@ -20,5 +20,6 @@ typedef enum MotorPos
 
 MotorDir motor_currentDirection();
 void motor_poll(MotorDir val);
+MotorPos motor_timeoutStatus();
 
 #endif

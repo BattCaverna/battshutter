@@ -133,7 +133,7 @@ static MotorFSM fsm_move(MotorDir val)
     motor_time -= delta;
 
   motor_time = motor_time < 0 ? 0 : motor_time;
-  
+
   if (motor_calibration)
     motor_time_max = motor_time > motor_time_max ? motor_time : motor_time_max;
   else
@@ -179,7 +179,35 @@ void motor_scheduleCalibration()
   motor_schedule_calibration = true;
 }
 
+long motor_position_time()
+{
+  return motor_time;
+}
+
 long motor_max()
 {
   return motor_time_max;
+}
+
+MotorPos motor_timeoutStatus();
+
+MotorPos motor_timeoutStatus()
+{
+  return motor_timeout;
+}
+
+void motor_setMax(long val)
+{
+  if (val < 0)
+    val = 0;
+
+  motor_time_max = val;
+}
+
+void motor_setCurr(long val)
+{
+  if (val < 0)
+    val = 0;
+
+  motor_time = val;
 }
