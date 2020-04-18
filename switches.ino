@@ -37,7 +37,7 @@ Switches switches_poll()
 
   long now = millis();
 
-  if (encoder_moving())
+  if (encoder_moving() || motor_position_time() != 0)
     down_press_start = now;
 
   if (digitalRead(UP_SWITCH) == 0)
@@ -49,7 +49,7 @@ Switches switches_poll()
   {
     // Check if we have reached the bottom home position: if we keep pressing the button
     // return an encoder reset event.
-    if (now - down_press_start > RESET_ENC_TIME && !encoder_moving())
+    if (now - down_press_start > RESET_ENC_TIME && !encoder_moving() && motor_position_time() == 0)
       curr_sw = S_RESET_ENC;
     else
       curr_sw = S_DOWN;
