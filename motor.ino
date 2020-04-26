@@ -150,6 +150,7 @@ static MotorFSM fsm_move(MotorDir val)
 
 static MotorFSM fsm_wait_stop(MotorDir val)
 {
+  (void)val;
   if (millis() - prev_move >= GUARD_TIME)
   {
     motor_setDir(MS_STOP);

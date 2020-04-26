@@ -64,8 +64,6 @@ void loop() {
   ModbusRTUServer.poll();
 
   target_pos = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
-  if (target_pos < 0)
-    target_pos = 0;
 
   if (target_pos > 100)
     target_pos = 100;

@@ -1,11 +1,9 @@
 #include "motor.h"
 #include "cfg.h"
 
-static int last_curr_pos = 0;
 static bool prev_encoder;
 static bool do_pulse;
 static long last_edge;
-static int last_max_pos = 0;
 static bool encoder_working = false;
 
 void encoder_init()
