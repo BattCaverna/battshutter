@@ -63,10 +63,14 @@ void loop() {
 
   ModbusRTUServer.poll();
 
-  target_pos = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
+  unsigned new_target = ModbusRTUServer.holdingRegisterRead(TARGET_REG);
+  if (new_target > 100)
+    new_target = 100;
+    
+  if (new_target != target_pos)
+    switche_resetLongPression();
 
-  if (target_pos > 100)
-    target_pos = 100;
+  target_pos = new_target;
 
   // Rewrite clamped target
   ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
@@ -101,17 +105,17 @@ void loop() {
 
 #if MODBUS_ON
 
+  Switches modbus_sw = (Switches)ModbusRTUServer.holdingRegisterRead(MANUAL_SWITCH_REG);
+
+  if (modbus_sw < S_NONE)
+    modbus_sw = S_NONE;
+
+  if (modbus_sw >= S_CNT)
+    modbus_sw = (Switches)(S_CNT - 1);
+
   // Only consider modbus switches if there aren't any manual ones
-  if (sw == last_sw && sw == S_NONE)
-  {
-    sw = (Switches)ModbusRTUServer.holdingRegisterRead(MANUAL_SWITCH_REG);
-
-    if (sw < S_NONE)
-      sw = S_NONE;
-
-    if (sw >= S_CNT)
-      sw = (Switches)(S_CNT - 1);
-  }
+  if ((sw == last_sw && sw == S_NONE) || modbus_sw == S_STOPMOVING)
+    sw = modbus_sw;
   else
     last_sw = sw;
 #endif
@@ -126,8 +130,9 @@ void loop() {
     {
       sw = S_NONE;
       last_sw = sw;
+      switche_resetLongPression();
     }
-      
+
 #if MODBUS_ON
     ModbusRTUServer.holdingRegisterWrite(TARGET_REG, target_pos);
   }

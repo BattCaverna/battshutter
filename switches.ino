@@ -26,10 +26,11 @@ static bool switches_debounce(Switches curr_sw)
   return (now - last_key_start > SW_DEBOUNCE_TIME);
 }
 
+static Switches long_press = S_NONE;
+
 Switches switches_poll()
 {
   static Switches prev_sw = S_NONE;
-  static Switches long_press = S_NONE;
   static long last_key_start = 0;
   static long down_press_start = 0;
 
@@ -88,4 +89,9 @@ Switches switches_poll()
     return long_press;
   else
     return curr_sw;
+}
+
+void switche_resetLongPression()
+{
+  long_press = S_NONE;
 }
